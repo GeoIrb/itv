@@ -64,7 +64,7 @@ func (w *RequestWorker) Delete(id int) {
 
 //Handling обработка запроса
 func (w *RequestWorker) Handling(request ClientRequest) (ClientResponse, error) {
-	response, err := request.Do(getTimeout())
+	response, err := request.do(getTimeout())
 	if err != nil {
 		w.env.Err("Handling Do: %v", err)
 		return ClientResponse{}, fmt.Errorf("Error request do: %v", err)

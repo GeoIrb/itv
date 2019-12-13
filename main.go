@@ -32,6 +32,8 @@ func main() {
 	e.Use(middleware.Static("react/build"))
 
 	taskc := controllers.NewTaskController(conn)
+	defer taskc.Kill()
+
 	reqg := e.Group("/request")
 	reqg.GET("", taskc.GetTasks)
 	reqg.POST("", taskc.FetchTask)
@@ -49,9 +51,6 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-
-	close(taskc.ReqChan)
-	close(taskc.ResChan)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

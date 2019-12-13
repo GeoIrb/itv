@@ -16,8 +16,7 @@ type ClientRequest struct {
 	Body    string            `json:"body" form:"body" query:"body"`
 }
 
-//Do обработка запроса клиента
-func (r ClientRequest) Do(timeout time.Duration) (*http.Response, error) {
+func (r ClientRequest) do(timeout time.Duration) (*http.Response, error) {
 	netClient := &http.Client{
 		Timeout: timeout,
 		Transport: &http.Transport{

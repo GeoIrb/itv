@@ -68,3 +68,8 @@ func (tc *TaskController) DeleteTask(context echo.Context) error {
 		return context.NoContent(http.StatusOK)
 	}
 }
+
+func (tc *TaskController) Kill() {
+	close(tc.ReqChan)
+	close(tc.ResChan)
+}
