@@ -1,4 +1,4 @@
-package request
+package models
 
 import (
 	"crypto/tls"
@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+//ClientRequest данные запроса клиента
+type ClientRequest struct {
+	Method  string            `json:"method" form:"method" query:"method"`
+	URL     string            `json:"url" form:"url" query:"url"`
+	Headers map[string]string `json:"headers" form:"headers" query:"headers"`
+	Body    string            `json:"body" form:"body" query:"body"`
+}
+
+//Do обработка запроса клиента
 func (r ClientRequest) Do(timeout time.Duration) (*http.Response, error) {
 	netClient := &http.Client{
 		Timeout: timeout,
