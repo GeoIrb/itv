@@ -30,10 +30,10 @@ func main() {
 
 	taskc := controllers.NewTaskController(conn)
 	reqg := e.Group("/request")
+	reqg.GET("", taskc.GetTasks)
 	reqg.POST("", taskc.FetchTask)
 	reqg.POST("/chan", taskc.FetchTaskChan)
 	reqg.DELETE("/:id", taskc.DeleteTask)
-	reqg.GET("", taskc.GetTasks)
 
 	go taskc.Worker.HandlingChan(taskc.ReqChan, taskc.ResChan)
 
