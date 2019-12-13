@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"time"
@@ -11,6 +12,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
+
+const defaultPort int = 9995
 
 func main() {
 	conn := app.Init()
@@ -38,7 +41,7 @@ func main() {
 	go taskc.Worker.HandlingChan(taskc.ReqChan, taskc.ResChan)
 
 	go func() {
-		if err := e.Start(":1323"); err != nil {
+		if err := e.Start(getServerPort()); err != nil {
 			e.Logger.Info("shutting down the server")
 		}
 	}()
@@ -55,4 +58,18 @@ func main() {
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
+}
+
+func getServerPort() (port string) {
+	waCnf := app.Load(app.GetPath())
+
+	serverPort := defaultPort
+
+	if waCnf != nil {
+		if port, isExist := waCnf["port"].(int); isExist {
+			serverPort = port
+		}
+	}
+
+	return fmt.Sprintf(":%d", serverPort)
 }

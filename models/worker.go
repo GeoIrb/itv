@@ -64,7 +64,7 @@ func (w *RequestWorker) Delete(id int) {
 
 //Handling обработка запроса
 func (w *RequestWorker) Handling(request ClientRequest) (ClientResponse, error) {
-	response, err := request.Do(10 * time.Second)
+	response, err := request.Do(getTimeout())
 	if err != nil {
 		w.env.Err("Handling Do: %v", err)
 		return ClientResponse{}, fmt.Errorf("Error request do: %v", err)
@@ -95,4 +95,18 @@ func (w *RequestWorker) HandlingChan(reqChan <-chan ClientRequest, resultChan ch
 			resultChan <- res
 		}(request)
 	}
+}
+
+func getTimeout() time.Duration {
+	timeout := 10 * time.Second
+
+	itCnf := app.Load(app.GetPath())
+
+	if itCnf != nil {
+		if t, isExist := itCnf["timeout"].(int); isExist {
+			timeout = time.Duration(t) * time.Second
+		}
+	}
+
+	return timeout
 }
