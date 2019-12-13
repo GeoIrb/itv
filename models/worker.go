@@ -14,7 +14,7 @@ type ClientResponse struct {
 	ID      int         `json:"id"`
 	Status  int         `json:"status"`
 	Headers http.Header `json:"headers"`
-	Length  int         `json:"length"`
+	Length  int64       `json:"length"`
 }
 
 //RequestWorker данные программы
@@ -64,33 +64,35 @@ func (w *RequestWorker) Delete(id int) {
 
 //Handling обработка запроса
 func (w *RequestWorker) Handling(request ClientRequest) (ClientResponse, error) {
-	idTask := w.Add(request)
-
 	response, err := request.Do(10 * time.Second)
 	if err != nil {
+		w.env.Err("Handling Do: %v", err)
 		return ClientResponse{}, fmt.Errorf("Error request do: %v", err)
 	}
+
+	idTask := w.Add(request)
 
 	resClient := ClientResponse{
 		ID:      idTask,
 		Status:  response.StatusCode,
 		Headers: response.Header,
+		Length:  response.ContentLength,
 	}
 
 	return resClient, nil
 }
 
 //HandlingChan получение задач из reqChan и отправка результата в resultChan
-func (w *RequestWorker) HandlingChan(reqChan <-chan ClientRequest, resultChan chan<- ClientResponse) {
+func (w *RequestWorker) HandlingChan(reqChan <-chan ClientRequest, resultChan chan<- interface{}) {
 	for request := range reqChan {
 		go func(request ClientRequest) {
-			resByte, err := w.Handling(request)
+			res, err := w.Handling(request)
 			if err != nil {
-				w.env.Err("FetchTask %v", err)
+				w.env.Err("HandlingChan Do: %v", err)
+				resultChan <- fmt.Errorf("HandlingChan %v", err)
 				return
 			}
-
-			resultChan <- resByte
+			resultChan <- res
 		}(request)
 	}
 }

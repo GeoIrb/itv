@@ -13,27 +13,28 @@ import (
 type TaskController struct {
 	Worker  models.RequestWorker
 	ReqChan chan models.ClientRequest
-	ResChan chan models.ClientResponse
+	ResChan chan interface{}
 }
 
+//NewTaskController создание нового контроллера
 func NewTaskController(env app.Data) TaskController {
 	return TaskController{
 		Worker:  models.NewRequestWorker(env),
 		ReqChan: make(chan models.ClientRequest, 1),
-		ResChan: make(chan models.ClientResponse, 1),
+		ResChan: make(chan interface{}, 1),
 	}
 }
 
 //FetchTask обработка запроса
 func (tc *TaskController) FetchTask(context echo.Context) error {
 	var req models.ClientRequest
-	if err := context.Bind(&req); err != nil {
+	if err := context.Bind(&req); err != nil || req.Method == "" {
 		return context.JSON(http.StatusBadRequest, models.Error{Message: err.Error()})
 	}
 
 	result, err := tc.Worker.Handling(req)
 	if err != nil {
-		context.JSON(http.StatusNotFound, models.Error{Message: err.Error()})
+		return context.JSON(http.StatusNotFound, models.Error{Message: err.Error()})
 	}
 
 	return context.JSON(http.StatusOK, result)
@@ -59,7 +60,7 @@ func (tc *TaskController) GetTasks(context echo.Context) error {
 
 //DeleteTask удаление запроса
 func (tc *TaskController) DeleteTask(context echo.Context) error {
-	idParam := context.Param(":id")
+	idParam := context.Param("id")
 	if id, err := strconv.Atoi(idParam); err != nil {
 		return context.JSON(http.StatusBadRequest, models.Error{Message: err.Error()})
 	} else {

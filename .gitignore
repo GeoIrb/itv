@@ -1,0 +1,4 @@
+debug*
+*.log
+.vscode
+itv-test

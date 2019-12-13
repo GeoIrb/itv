@@ -46,6 +46,9 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
+	close(taskc.ReqChan)
+	close(taskc.ResChan)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
