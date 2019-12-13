@@ -29,10 +29,11 @@ func main() {
 	e.Use(middleware.Static("react/build"))
 
 	taskc := controllers.NewTaskController(conn)
-	e.POST("/request", taskc.FetchTask)
-	e.POST("/request/chan", taskc.FetchTaskChan)
-	e.DELETE("/request/:id", taskc.DeleteTask)
-	e.GET("/requests", taskc.GetTasks)
+	reqg := e.Group("/request")
+	reqg.POST("", taskc.FetchTask)
+	reqg.POST("/chan", taskc.FetchTaskChan)
+	reqg.DELETE("/:id", taskc.DeleteTask)
+	reqg.GET("", taskc.GetTasks)
 
 	go taskc.Worker.HandlingChan(taskc.ReqChan, taskc.ResChan)
 
