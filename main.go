@@ -31,16 +31,16 @@ func main() {
 	}))
 	e.Use(middleware.Static("react/build"))
 
-	taskc := controllers.NewTaskController(conn)
-	defer taskc.Kill()
+	taskController := controllers.NewTaskController(conn)
+	defer taskController.Kill()
 
-	reqg := e.Group("/request")
-	reqg.GET("", taskc.GetTasks)
-	reqg.POST("", taskc.FetchTask)
-	reqg.POST("/chan", taskc.FetchTaskChan)
-	reqg.DELETE("/:id", taskc.DeleteTask)
+	reqGroup := e.Group("/request")
+	reqGroup.GET("", taskController.GetTasks)
+	reqGroup.POST("", taskController.FetchTask)
+	reqGroup.POST("/chan", taskController.FetchTaskChan)
+	reqGroup.DELETE("/:id", taskController.DeleteTask)
 
-	go taskc.Worker.HandlingChan(taskc.ReqChan, taskc.ResChan)
+	go taskController.Worker.HandlingChan(taskController.ReqChan, taskController.ResChan)
 
 	go func() {
 		if err := e.Start(getServerPort()); err != nil {
