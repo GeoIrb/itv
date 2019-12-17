@@ -60,7 +60,7 @@ func main() {
 }
 
 func getServerPort() (port string) {
-	waCnf := app.Load(app.GetPath())
+	waCnf := app.Load()
 
 	serverPort := defaultPort
 
